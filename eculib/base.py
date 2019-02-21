@@ -1,6 +1,5 @@
 import os, sys, platform
 from pylibftdi import Device
-from pydispatch import dispatcher
 
 class KlineAdapter(Device):
 
@@ -17,3 +16,6 @@ class KlineAdapter(Device):
 		return self._read(1) == b"\xff"
 
 class ECU(object):
+
+	def __init__(self, klineadapter):
+		self.dev = klineadapter
