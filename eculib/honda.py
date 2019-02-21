@@ -1,6 +1,6 @@
 import time
 from enum import Enum
-from base import ECU
+from .base import ECU
 from pydispatch import dispatcher
 
 class ECUSTATE(Enum):
