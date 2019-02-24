@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='eculib',
-    version='1.0.1',
+    version='1.0.2',
     description='A library for K-line based ECU communication',
     url='https://github.com/MCU-Innovations/eculib',
     author='Ryan M. Hope',

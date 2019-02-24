@@ -1,4 +1,5 @@
 import time
+import struct
 from enum import Enum
 from .base import ECU
 from pydispatch import dispatcher
