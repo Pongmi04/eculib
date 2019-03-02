@@ -8,15 +8,15 @@ class ECUSTATE(Enum):
 	UNKNOWN = -1
 	OFF = 0
 	READ = 1
-	OK = 2
-	RECOVER_OLD = 3
-	RECOVER_NEW = 4
-	WRITE_INIT_OLD = 5
-	WRITE_INIT_NEW = 6
-	ERASE = 7
-	WRITE = 8
-	WRITE_GOOD = 9
-	WRITE_UNKNOWN1 = 10
+	READING = 2
+	OK = 3
+	RECOVER_OLD = 4
+	RECOVER_NEW = 5
+	WRITE = 6
+	WRITING = 7
+	ERASING = 8
+	INIT_WRITE = 9
+	INIT_RECOVER = 10
 	ERROR = 11
 
 DTC = {
@@ -160,41 +160,28 @@ class HondaECU(ECU):
 		return self.send_command([0xfe],[0x72], retries=0) != None
 
 	def detect_ecu_state(self):
-		t0 = self.send_command([0x72], [0x71, 0x00], retries=0)
-		if t0 is None:
-			self.init()
-			self.ping()
+		if self.dev.kline():
 			t0 = self.send_command([0x72], [0x71, 0x00], retries=0)
-		if not t0 is None:
-			if bytes(t0[2][5:7]) != b"\x00\x00":
-				return ECUSTATE.OK
-			else:
-				if self.send_command([0x7d], [0x01, 0x01, 0x00], retries=0):
-					return ECUSTATE.RECOVER_OLD
-				if self.send_command([0x7b], [0x00, 0x01, 0x01], retries=0):
-					return ECUSTATE.RECOVER_NEW
-		else:
+			if t0 is None:
+				self.init()
+				self.ping()
+				t0 = self.send_command([0x72], [0x71, 0x00], retries=0)
+			if t0 is not None:
+				if bytes(t0[2][5:7]) != b"\x00\x00":
+					return ECUSTATE.OK
+			if self.send_command([0x7d], [0x01, 0x01, 0x00], retries=0):
+				return ECUSTATE.RECOVER_OLD
+			if self.send_command([0x7b], [0x00, 0x01, 0x01], retries=0):
+				return ECUSTATE.RECOVER_NEW
 			writestatus = self.send_command([0x7e], [0x01, 0x01, 0x00], retries=0)
-			if not writestatus is None:
-				if writestatus[2][1] == 0x0f:
-					return ECUSTATE.WRITE_GOOD
-				elif writestatus[2][1] == 0x10:
-					return ECUSTATE.WRITE_INIT_OLD
-				elif writestatus[2][1] == 0x20:
-					return ECUSTATE.WRITE_INIT_NEW
-				elif writestatus[2][1] == 0x30:
-					return ECUSTATE.ERASE
-				elif writestatus[2][1] == 0x40:
-					return ECUSTATE.WRITE
-				elif writestatus[2][1] == 0x0:
-					return ECUSTATE.WRITE_UNKNOWN1
-				else:
-					return ECUSTATE.ERROR
-			else:
-				readinfo = self.send_command([0x82, 0x82, 0x00], [0x00, 0x00, 0x00, 0x08], retries=0)
-				if not readinfo is None:
-					return ECUSTATE.READ
-		return ECUSTATE.OFF if not self.dev.kline() else ECUSTATE.UNKNOWN
+			if writestatus is not None:
+				return ECUSTATE.WRITE
+			readinfo = self.send_command([0x82, 0x82, 0x00], [0x00, 0x00, 0x00, 0x08], retries=0)
+			if not readinfo is None:
+				return ECUSTATE.READ
+			return ECUSTATE.UNKNOWN
+		else:
+			return ECUSTATE.OFF
 
 	def probe_tables(self, tables=None):
 		if not tables:

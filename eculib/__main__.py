@@ -22,7 +22,7 @@ def Main():
 	parser.add_argument('-d','--device', help="ftdi device serial number", default=default_device)
 	subparsers = parser.add_subparsers(metavar='mode',dest='mode')
 
-	parser_recover = subparsers.add_parser('kline', help='test kline')
+	parser_kline = subparsers.add_parser('kline', help='test kline')
 
 	db_grp = parser.add_argument_group('debugging options')
 	db_grp.add_argument('--list-devices', action='store_true', help="list ftdi devices")

@@ -1,5 +1,6 @@
 import os, sys, platform
 from pylibftdi import Device
+import time
 
 class KlineAdapter(Device):
 
@@ -13,7 +14,11 @@ class KlineAdapter(Device):
 	def kline(self):
 		self.flush()
 		self._write(b"\xff")
-		return self._read(1) == b"\xff"
+		time.sleep(.002)
+		ret = self._read(1) == b"\xff"
+		time.sleep(.002)
+		self.ftdi_fn.ftdi_usb_purge_buffers()
+		return ret
 
 class ECU(object):
 
