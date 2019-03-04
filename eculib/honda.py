@@ -159,6 +159,9 @@ class HondaECU(ECU):
 	def ping(self):
 		return self.send_command([0xfe],[0x72], retries=0) != None
 
+	def diag(self):
+		return self.send_command([0x72],[0x00, 0xf0]) != None
+
 	def detect_ecu_state(self):
 		if self.dev.kline():
 			t0 = self.send_command([0x72], [0x71, 0x00], retries=0)
@@ -175,6 +178,8 @@ class HondaECU(ECU):
 				return ECUSTATE.RECOVER_NEW
 			writestatus = self.send_command([0x7e], [0x01, 0x01, 0x00], retries=0)
 			if writestatus is not None:
+				if writestatus[2][1] == 0xf0:
+					return ECUSTATE.ERROR
 				return ECUSTATE.WRITE
 			readinfo = self.send_command([0x82, 0x82, 0x00], [0x00, 0x00, 0x00, 0x08], retries=0)
 			if not readinfo is None:
