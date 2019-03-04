@@ -1,5 +1,6 @@
 import os, sys, platform
 from pylibftdi import Device
+from ctypes import *
 import time
 
 class KlineAdapter(Device):
@@ -12,11 +13,10 @@ class KlineAdapter(Device):
 		self.ftdi_fn.ftdi_usb_purge_buffers()
 
 	def kline(self):
-		self.flush()
-		self._write(b"\xff")
+		self.ftdi_fn.ftdi_usb_purge_buffers()
+		self._write(b"\x00")
 		time.sleep(.002)
-		ret = self._read(1) == b"\xff"
-		time.sleep(.002)
+		ret = (self._read(1) == b"\x00")
 		self.ftdi_fn.ftdi_usb_purge_buffers()
 		return ret
 
