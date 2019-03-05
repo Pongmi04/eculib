@@ -5,7 +5,7 @@ from .base import ECU
 from pydispatch import dispatcher
 
 class ECUSTATE(Enum):
-	UNKNOWN = -1
+	UNDEFINED = -1
 	OFF = 0
 	READ = 1
 	READING = 2
@@ -18,6 +18,7 @@ class ECUSTATE(Enum):
 	INIT_WRITE = 9
 	INIT_RECOVER = 10
 	ERROR = 11
+	UNKNOWN = 12
 
 DTC = {
 	"01-01": "MAP sensor circuit low voltage",
